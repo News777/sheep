@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid';
 import { checkIsKill, isOverlap } from './filterSheep.js';
 const level = 10; // 小羊层次
 
-const levelSheepNum = randomRange(10, 30); //层次 小羊数量 10-30
+const levelSheepNum = randomRange(40, 60); //层次 小羊数量 10-30
 
 // 保证同级的不会重叠 *************
 
@@ -10,27 +10,26 @@ export function generateSheep() {
   let sheepFlock = [];
   for (let level = 10; level > 1; level--) {
     const levelNum = randomRange(level, 10 + level);
-    const levelRandArr = getRandomNum(
-      { min: 200, max: 1600 },
-      { min: 100, max: 800 },
-      levelNum
-    );
-    for (let sheepIndex = 1; sheepIndex <= levelNum; sheepIndex++) {
+    for (let sheepIndex = 1; sheepIndex < levelNum; sheepIndex++) {
+      const levelRandArr = getRandomNum(
+        { min: 200 + (10 - level) * 50, max: 1200 - (200 + (10 - level) * 50) },
+        { min: 100 + (10 - level) * 50, max: 600 - (200 + (10 - level) * 50) },
+        levelNum
+      );
       let param = {};
-      if (level > 5) {
-        if (level === 10) {
-          param = {
-            id: nanoid(),
-            style: {
-              zIndex: level,
-              //起始 200 ，结尾800
-              left: levelRandArr[sheepIndex - 1].x + 'px',
-              top: levelRandArr[sheepIndex - 1].y + 'px',
-              cursor: 'pointer',
-              back: 'rgba(255,255,255,1)',
-            },
-          };
-        } /*  else
+      // if (level > 5) {
+      param = {
+        id: nanoid(),
+        style: {
+          zIndex: level,
+          //起始 200 ，结尾800
+          left: levelRandArr[sheepIndex - 1].x + 'px',
+          top: levelRandArr[sheepIndex - 1].y + 'px',
+          cursor: 'pointer',
+          back: 'rgba(255,255,255,1)',
+        },
+      };
+      /* else
           param = {
             id: nanoid(),
             style: {
@@ -40,9 +39,9 @@ export function generateSheep() {
               top: 100 + randomRange(1, 300) + 'px',
               cursor: 'pointer',
             },
-          }; */
-      } else {
-        /*  param = {
+          };  */
+      /* }  else {
+        param = {
           id: nanoid(),
           style: {
             zIndex: level,
@@ -61,10 +60,10 @@ export function generateSheep() {
             cursor: 'pointer',
           },
         }; */
-      }
       sheepFlock.push(param);
     }
   }
+
   /* for (const item of sheepFlock) {
     if (checkIsKill(item, sheepFlock)) {
       item.style.back = 'rgba(255,255,255,1)';
@@ -72,10 +71,10 @@ export function generateSheep() {
       item.style.back = `rgba(223, 219, 219, ${0.1*item.style.zIndex})`;
     }
   } */
-  // return colourSheep(sheepFlock);
-  return sheepFlock.filter((o) => o.id != undefined);
+  return colourSheep(sheepFlock);
+  // return sheepFlock.filter((o) => o.id != undefined);
 }
-
+// 层次上色
 export function colourSheep(sheepFlock) {
   for (const item of sheepFlock) {
     if (checkIsKill(item, sheepFlock)) {
@@ -93,6 +92,7 @@ function randomRange(startNumber, endNumber) {
   return Math.floor(Math.random() * choice + startNumber);
 }
 
+// 随机生产法 - 行不通，开销大，浏览器会报死
 export function getRandomNum(xRange, yRange, countNum) {
   var xyArr = [];
   // 在此处补全代码
@@ -106,23 +106,22 @@ export function getRandomNum(xRange, yRange, countNum) {
     );
     console.log(singleXy);
     let flag = true;
-    if (xyArr.length)
-      for (let index = 0; index < xyArr.length; index++) {
-        const xyRange = {
-          xBegin: singleXy.x,
-          xEnd: singleXy.x + 100,
-          yBegin: singleXy.y,
-          yEnd: singleXy.y + 100,
-        };
-        if (isOverlap(xyRange, xyArr[index])) {
-          flag = false;
-          break;
-        }
+    const xyRange = {
+      xBegin: singleXy.x,
+      xEnd: singleXy.x + 50,
+      yBegin: singleXy.y,
+      yEnd: singleXy.y + 50,
+    };
+    for (let index = 0; index < xyArr.length; index++) {
+      if (isOverlap(xyRange, xyArr[index])) {
+        flag = false;
+        break;
       }
+    }
     if (flag) {
       xyArr.push(singleXy);
     } else {
-      xyArr.push(singleXy);
+      i--;
     }
     /* if (!flag) {
       i--;

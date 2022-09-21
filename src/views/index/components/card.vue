@@ -21,8 +21,8 @@ const props = defineProps({
   z-index: v-bind('styles.zIndex');
   background: v-bind('styles.back');
   cursor: v-bind('styles.cursor');
-  width: 100px;
-  height: 100px;
+  width: 50px;
+  height: 50px;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   border-radius: 6px;

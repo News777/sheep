@@ -82,9 +82,6 @@ const killSheep = (row) => {
 };
 onMounted(() => {
   state.sheepFlock = generateSheep();
-  console.log(
-    getRandomNum({ min: 200, max: 1600 }, { min: 100, max: 800 }, 25)
-  );
 });
 const { sheepFlock } = toRefs(state);
 </script>

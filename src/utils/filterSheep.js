@@ -2,9 +2,9 @@ export function checkIsKill(obj, optList) {
   let flag = true;
   const xyRange = {
     xBegin: separatePxToFloat(obj.style.left),
-    xEnd: separatePxToFloat(obj.style.left) + 100,
+    xEnd: separatePxToFloat(obj.style.left) + 50,
     yBegin: separatePxToFloat(obj.style.top),
-    yEnd: separatePxToFloat(obj.style.top) + 100,
+    yEnd: separatePxToFloat(obj.style.top) + 50,
     zIndex: obj.style.zIndex,
   };
   for (let index = 0; index < optList.length; index++) {
@@ -39,9 +39,9 @@ export function isOverlap(sourceRect, targetRect) {
   // 先获取目标 长方形的四个顶点
   const targetList = [
     { x: targetRect.x, y: targetRect.y }, // 左上角
-    { x: targetRect.x, y: targetRect.y + 100 }, // 左下角
-    { x: targetRect.x + 100, y: targetRect.y }, // 右上角
-    { x: targetRect.x + 100, y: targetRect.y + 100 }, // 右下角
+    { x: targetRect.x, y: targetRect.y + 50 }, // 左下角
+    { x: targetRect.x + 50, y: targetRect.y }, // 右上角
+    { x: targetRect.x + 50, y: targetRect.y + 50 }, // 右下角
   ];
   let flag = false;
   for (let index = 0; index < targetList.length; index++) {
