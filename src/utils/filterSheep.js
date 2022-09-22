@@ -2,9 +2,9 @@ export function checkIsKill(obj, optList) {
   let flag = true;
   const xyRange = {
     xBegin: separatePxToFloat(obj.style.left),
-    xEnd: separatePxToFloat(obj.style.left) + 50,
+    xEnd: separatePxToFloat(obj.style.left) + sheepLen,
     yBegin: separatePxToFloat(obj.style.top),
-    yEnd: separatePxToFloat(obj.style.top) + 50,
+    yEnd: separatePxToFloat(obj.style.top) + sheepLen,
     zIndex: obj.style.zIndex,
   };
   for (let index = 0; index < optList.length; index++) {
@@ -17,7 +17,6 @@ export function checkIsKill(obj, optList) {
       if (optList[index].style.zIndex > xyRange.zIndex) {
         flag = false;
       }
-    console.log(flag);
     if (!flag) {
       break;
     }
@@ -34,14 +33,17 @@ export function separatePxToFloat(field) {
   const pxIndex = field.indexOf('px');
   return parseFloat(field.slice(0, pxIndex));
 }
+
+const sheepLen = 50; // 小🐏 方块长高长度
+
 // 判断两个长方形是否重叠
 export function isOverlap(sourceRect, targetRect) {
   // 先获取目标 长方形的四个顶点
   const targetList = [
     { x: targetRect.x, y: targetRect.y }, // 左上角
-    { x: targetRect.x, y: targetRect.y + 50 }, // 左下角
-    { x: targetRect.x + 50, y: targetRect.y }, // 右上角
-    { x: targetRect.x + 50, y: targetRect.y + 50 }, // 右下角
+    { x: targetRect.x, y: targetRect.y + sheepLen }, // 左下角
+    { x: targetRect.x + sheepLen, y: targetRect.y }, // 右上角
+    { x: targetRect.x + sheepLen, y: targetRect.y + sheepLen }, // 右下角
   ];
   let flag = false;
   for (let index = 0; index < targetList.length; index++) {

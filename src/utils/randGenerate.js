@@ -9,11 +9,11 @@ const levelSheepNum = randomRange(40, 60); //层次 小羊数量 10-30
 export function generateSheep() {
   let sheepFlock = [];
   for (let level = 10; level > 1; level--) {
-    const levelNum = randomRange(level, 10 + level);
+    const levelNum = randomRange(20, 40);
     for (let sheepIndex = 1; sheepIndex < levelNum; sheepIndex++) {
       const levelRandArr = getRandomNum(
-        { min: 200 + (10 - level) * 50, max: 1200 - (200 + (10 - level) * 50) },
-        { min: 100 + (10 - level) * 50, max: 600 - (200 + (10 - level) * 50) },
+        { min: 200, max: 1600 },
+        { min: 100, max: 800 },
         levelNum
       );
       let param = {};
@@ -26,7 +26,7 @@ export function generateSheep() {
           left: levelRandArr[sheepIndex - 1].x + 'px',
           top: levelRandArr[sheepIndex - 1].y + 'px',
           cursor: 'pointer',
-          back: 'rgba(255,255,255,1)',
+          // back: 'rgba(255,255,255,1)',
         },
       };
       /* else
@@ -71,6 +71,7 @@ export function generateSheep() {
       item.style.back = `rgba(223, 219, 219, ${0.1*item.style.zIndex})`;
     }
   } */
+  console.log(sheepFlock);
   return colourSheep(sheepFlock);
   // return sheepFlock.filter((o) => o.id != undefined);
 }
@@ -104,7 +105,7 @@ export function getRandomNum(xRange, yRange, countNum) {
     singleXy.y = Math.floor(
       Math.random() * (yRange.max - yRange.min) + yRange.min
     );
-    console.log(singleXy);
+    // console.log(singleXy);
     let flag = true;
     const xyRange = {
       xBegin: singleXy.x,
@@ -129,16 +130,3 @@ export function getRandomNum(xRange, yRange, countNum) {
   }
   return xyArr;
 }
-/* if (xy.x >= singleXy.x && xy.x <= singleXy.x + 100) {
-          if (xy.y >= singleXy.y && xy.y <= singleXy.y + 100) {
-            flag = false;
-            break;
-          } else {
-            xyArr.push(singleXy);
-          }
-        } else {
-          xyArr.push(singleXy);
-        }
-        if (!flag) {
-          break;
-        } */

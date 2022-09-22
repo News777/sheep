@@ -4,8 +4,14 @@
     <card
       v-for="item in sheepFlock"
       :styles="item.style"
+      :animalName="item.animalName"
       @click="killSheep(item)"
     />
+    <div class="killCol">
+      <div class="killCard" v-for="item in killList">
+        <i class="iconfont" :class="`icon-${item.animalName}`"></i>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -18,72 +24,29 @@ import {
   checkIsKill,
 } from '@/utils/filterSheep';
 import card from './components/card.vue';
-import { generateSheep, colourSheep, getRandomNum } from '@/utils/randGenerate';
+// import {colourSheep, getRandomNum } from '@/utils/randGenerate';
+import {
+  generateGamePiece,
+  generateSheep,
+  colourSheep,
+} from '@/utils/gridGenerate';
 const state = reactive({
-  sheepFlock: [
-    /*   {
-      id: nanoid(),
-      style: {
-        zIndex: 1,
-        left: '450px',
-        top: '500px',
-        back: 'rgba(223, 219, 219, 0.6)',
-        cursor: 'auto',
-      },
-    },
-    {
-      id: nanoid(),
-      style: {
-        zIndex: 10,
-        left: '500px',
-        top: '500px',
-        back: 'rgba(255,255,255,1)',
-        cursor: 'pointer',
-      },
-    },
-    {
-      id: nanoid(),
-      style: {
-        zIndex: 9,
-        left: '460px',
-        top: '500px',
-        back: 'rgba(255,255,255,1)',
-        cursor: 'pointer',
-      },
-    },
-    {
-      id: nanoid(),
-      style: {
-        zIndex: 8,
-        left: '460px',
-        top: '590px',
-        back: 'rgba(255,255,255,1)',
-        cursor: 'pointer',
-      },
-    },
-    {
-      id: nanoid(),
-      style: {
-        zIndex: 7,
-        left: '470px',
-        top: '580px',
-        back: 'rgba(255,255,255,1)',
-        cursor: 'pointer',
-      },
-    }, */
-  ],
+  sheepFlock: [],
+  killList: [],
 });
 
 const killSheep = (row) => {
   if (checkIsKill(row, state.sheepFlock)) {
     state.sheepFlock = state.sheepFlock.filter((o) => o.id != row.id);
-    // state.sheepFlock = colourSheep(state.sheepFlock);
+    state.killList.push(row);
+    state.sheepFlock = colourSheep(state.sheepFlock);
   } else alert('非首层');
 };
 onMounted(() => {
   state.sheepFlock = generateSheep();
+  console.log(state.sheepFlock);
 });
-const { sheepFlock } = toRefs(state);
+const { sheepFlock, killList } = toRefs(state);
 </script>
 
 <style lang="scss" scoped>
@@ -91,7 +54,7 @@ const { sheepFlock } = toRefs(state);
   width: 100%;
   height: 100%;
   position: relative;
-  .card-sheep {
+  /* .card-sheep {
     position: absolute;
     top: 500px;
     left: 500px;
@@ -104,6 +67,26 @@ const { sheepFlock } = toRefs(state);
     left: 500px;
     z-index: 10;
     background: #fff;
+  } */
+  .killCol {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 380px;
+    height: 70px;
+    border: 1px solid forestgreen;
+    padding: 10px 15px;
+    display: flex;
+    .killCard {
+      width: 48px;
+      height: 48px;
+      border: 1px solid #9f9f9f;
+      box-sizing: content-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
 }
 </style>

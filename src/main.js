@@ -1,5 +1,7 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import store from './store'
+import { createApp } from 'vue';
+import App from './App.vue';
+import store from './store';
 
-createApp(App).use(store).mount('#app')
+import './icons/iconfont.css';
+
+createApp(App).use(store).mount('#app');
