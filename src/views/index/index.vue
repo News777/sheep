@@ -9,7 +9,9 @@
     />
     <div class="killCol">
       <div class="killCard" v-for="item in killList">
-        <i class="iconfont" :class="`icon-${item.animalName}`"></i>
+        <svg class="icon" aria-hidden="true">
+          <use :xlink:href="`#icon-${item.animalName}`"></use>
+        </svg>
       </div>
     </div>
   </div>
@@ -17,7 +19,7 @@
 
 <script setup>
 import { nanoid } from 'nanoid';
-import { reactive, toRefs, onMounted } from 'vue';
+import { reactive, toRefs, onMounted, watch } from 'vue';
 import {
   separatePx,
   separatePxToFloat,
@@ -42,6 +44,12 @@ const killSheep = (row) => {
     state.sheepFlock = colourSheep(state.sheepFlock);
   } else alert('非首层');
 };
+watch(
+  () => [...state.killList],
+  (newVal) => {
+    console.log(newVal);
+  }
+);
 onMounted(() => {
   state.sheepFlock = generateSheep();
   console.log(state.sheepFlock);
@@ -71,16 +79,16 @@ const { sheepFlock, killList } = toRefs(state);
   .killCol {
     position: absolute;
     bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 380px;
-    height: 70px;
+    left: 200px;
+    // transform: translateX(-50%);
+    width: 730px;
+    height: 120px;
     border: 1px solid forestgreen;
     padding: 10px 15px;
     display: flex;
     .killCard {
-      width: 48px;
-      height: 48px;
+      width: 98px;
+      height: 98px;
       border: 1px solid #9f9f9f;
       box-sizing: content-box;
       display: flex;

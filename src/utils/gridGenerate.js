@@ -4,14 +4,15 @@ import { checkIsKill, isOverlap } from './filterSheep.js';
 const gameAreaRange = {
   xBegin: 200,
   yBegin: 100,
-  xEnd: 600,
-  yEnd: 400,
+  xEnd: 1000,
+  yEnd: 700,
 }; // 游戏区域起始位置  并逐渐递减
 
 let levelNum = 10; // 小羊层次 相当于z轴
 
-const SheepPieceLen = 50; // 🐏 方块 边长
+const SheepPieceLen = 100; // 🐏 方块 边长
 
+const useAnimalNum = 10; // 使用 🐏 种类
 // 创建棋盘三维数组
 // x:y轴  y:x轴 z:是否被占用
 export function generateGamePiece(gameArea) {
@@ -44,7 +45,7 @@ export function generateGamePiece(gameArea) {
 // 共有网格 48
 // 网格三维 [6][8][2]
 
-// 创建每层次棋盘区域以及产生的小羊数量
+// 创建每层次棋盘区域以及产生的小羊总数量
 function generateGameAreaAndRandSheepNum() {
   let gameAreaAndRandSheepNumList = [];
   let sheepTotal = 0; // 小羊总数（所有层次相加）
@@ -71,9 +72,10 @@ function generateGameAreaAndRandSheepNum() {
 
 export function generateSheep() {
   let sheepFlock = [];
-  let animalList = getAnimalList();
   let { gameAreaAndRandSheepNumList, sheepTotal } =
-    generateGameAreaAndRandSheepNum();
+    generateGameAreaAndRandSheepNum(); // 获取所有层次网格及每层次随机网格数量。。。
+  let animalList = getAnimalList(sheepTotal); // 获取动物列表
+  console.log(animalList, 'animalList');
   for (let level = levelNum; level >= 1; level--) {
     /* const gameArea = {
       xBegin: gameAreaRange.xBegin + (levelNum - level) * levelNum,
@@ -102,10 +104,17 @@ export function generateSheep() {
       const yAxis = randomRange(0, gameDisc.yNum - 1);
       const coord = gameDisc.pieceList[yAxis][xAxis];
       if (coord[2]) {
+        // 坑位被占，回退-1
         curLevelSheepIndex--;
         continue;
       } else {
-        const animal = getAnimalNo(animalList, sheepTotal); // 随机动物编号
+        // 坑位还在
+        const animal = getAnimalNo(
+          animalList,
+          sheepTotal,
+          randomSheepNum,
+          level
+        ); // 取得随机动物编号 - 图片名称
         animalList = animal.obj;
         const param = {
           id: nanoid(),
@@ -160,8 +169,12 @@ export function colourSheep(sheepFlock) {
   }
   return sheepFlock;
 }
-
-export function getAnimalList() {
+/**
+ *
+ * @param {产生的动物总数量} curTotalNum
+ * @returns
+ */
+export function getAnimalList(curTotalNum) {
   const animalList = [
     'Artboard1',
     'Artboard2',
@@ -202,28 +215,55 @@ export function getAnimalList() {
     'Artboard37',
     'Artboard38',
   ];
-  return animalList.map((o) => {
+  let curAnimalList = animalList.filter((o) => {
+    return Number(o.slice(8)) <= useAnimalNum;
+  });
+  const animalListNum = Math.floor(curTotalNum / (3 * useAnimalNum)); // 动物列表的动物要进行'几趟'，向下取整
+  const finalanimalListNum = (curTotalNum % (3 * useAnimalNum)) / 3; // 最后一趟参与的动物数量
+  let finalAnimalList = curAnimalList.map((o) => {
     let t = {};
-    t[o] = 0;
+    if (Number(o.slice(8)) <= finalanimalListNum) {
+      t[o] = animalListNum * 3 + 3;
+    } else {
+      t[o] = animalListNum;
+    }
     return t;
   });
+  return finalAnimalList;
 }
 /**
  *
  * @param {动物列表占用情况} animalList
  * @param {当前还有多少动物未占用席位} curTotal
+ * @param {当前层级动物数量} curLevelSheepNum
+ * @param {当前层级} level
  * @returns
  */
-function getAnimalNo(animalList, curTotal) {
-  const animalNo = randomRange(0, 37);
-  if (animalList[animalNo]['Artboard' + (animalNo + 1)] === 3) {
-    animalList[animalNo]['Artboard' + (animalNo + 1)] = 1;
+// 暂不考虑赢的分配动物分配算法，全靠概率赢
+function getAnimalNo(animalList, curTotal, curLevelSheepNum, level) {
+  const animalNo = randomRange(0, useAnimalNum - 1); //采用10头sheep，也就是30一轮回
+  let flag = true;
+  if (animalList[animalNo]['Artboard' + (animalNo + 1)] > 0) {
+    animalList[animalNo]['Artboard' + (animalNo + 1)] -= 1;
   } else {
-    animalList[animalNo]['Artboard' + (animalNo + 1)] =
-      animalList[animalNo]['Artboard' + (animalNo + 1)] + 1;
+    flag = false;
   }
-  return {
-    name: 'Artboard' + (animalNo + 1),
-    obj: animalList,
-  };
+  if (!flag && !checkAnimalNumOut(animalList)) {
+    return getAnimalNo(animalList, curTotal, curLevelSheepNum, level);
+  } else
+    return {
+      name: 'Artboard' + (animalNo + 1),
+      obj: animalList,
+    };
+}
+// 检查动物数量是否都用完了
+function checkAnimalNumOut(list) {
+  let total = 0;
+  for (let index = 0; index < list.length; index++) {
+    const element = list[index];
+    if (element['Artboard' + (index + 1)] === 0) {
+      total += 1;
+    }
+  }
+  return total === useAnimalNum ? true : false;
 }

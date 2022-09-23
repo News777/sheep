@@ -5,7 +5,9 @@
     <!-- <img src="../../../assets/images_50/Artboard1.png" alt="" /> -->
     <!-- <div></div> -->
     <!-- <span>{{ animalName }}</span> -->
-    <i class="iconfont" :class="`icon-${animalName}`"></i>
+    <svg class="icon" aria-hidden="true">
+      <use :xlink:href="`#icon-${animalName}`"></use>
+    </svg>
   </div>
 </template>
 
@@ -25,8 +27,12 @@ const props = defineProps({
 const name = computed(() => {
   return require(`../../../assets/images_50/${props.animalName}.png`);
 });
+const svgName = computed(() => {
+  return `#icon-${animalName}`;
+});
 // 需要减去border
-const sheepPieceLen = '48px';
+const sheepPieceLen = '98px';
+const iLen = '50px';
 </script>
 
 <style lang="scss" scoped>
@@ -55,5 +61,17 @@ const sheepPieceLen = '48px';
     width: v-bind('sheepPieceLen');
     height: v-bind('sheepPieceLen');
   }
+  & > i {
+    font-size: v-bind('iLen');
+  }
+}
+</style>
+<style type="text/css">
+.icon {
+  width: 2em;
+  height: 2em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
 }
 </style>

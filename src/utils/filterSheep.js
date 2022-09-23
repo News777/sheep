@@ -34,7 +34,7 @@ export function separatePxToFloat(field) {
   return parseFloat(field.slice(0, pxIndex));
 }
 
-const sheepLen = 50; // 小🐏 方块长高长度
+const sheepLen = 100; // 小🐏 方块长高长度
 
 // 判断两个长方形是否重叠
 export function isOverlap(sourceRect, targetRect) {
