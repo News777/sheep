@@ -225,10 +225,11 @@ export function getAnimalList(curTotalNum) {
     if (Number(o.slice(8)) <= finalanimalListNum) {
       t[o] = animalListNum * 3 + 3;
     } else {
-      t[o] = animalListNum;
+      t[o] = animalListNum * 3;
     }
     return t;
   });
+  console.log(finalAnimalList, 'finalAnimalList');
   return finalAnimalList;
 }
 /**

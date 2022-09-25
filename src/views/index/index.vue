@@ -1,17 +1,19 @@
 /** 初次想法 - 不行 - 采用层次遮罩的形式 */ /** 第二次想法 - 先实践一下 */
 <template>
   <div class="main-container">
-    <card
-      v-for="item in sheepFlock"
-      :styles="item.style"
-      :animalName="item.animalName"
-      @click="killSheep(item)"
-    />
-    <div class="killCol">
-      <div class="killCard" v-for="item in killList">
-        <svg class="icon" aria-hidden="true">
-          <use :xlink:href="`#icon-${item.animalName}`"></use>
-        </svg>
+    <div>
+      <card
+        v-for="item in sheepFlock"
+        :styles="item.style"
+        :animalName="item.animalName"
+        @click="killSheep(item)"
+      />
+      <div class="killCol">
+        <div class="killCard" v-for="item in killList">
+          <svg class="icon" aria-hidden="true">
+            <use :xlink:href="`#icon-${item.animalName}`"></use>
+          </svg>
+        </div>
       </div>
     </div>
   </div>
@@ -32,14 +34,18 @@ import {
   generateSheep,
   colourSheep,
 } from '@/utils/gridGenerate';
+import { ElMessage, ElMessageBox } from 'element-plus';
 const state = reactive({
   sheepFlock: [],
   killList: [],
+  curChoiceSheep: {},
+  gameOverStatus: false,
 });
 
 const killSheep = (row) => {
   if (checkIsKill(row, state.sheepFlock)) {
     state.sheepFlock = state.sheepFlock.filter((o) => o.id != row.id);
+    state.curChoiceSheep = row;
     state.killList.push(row);
     state.sheepFlock = colourSheep(state.sheepFlock);
   } else alert('非首层');
@@ -47,14 +53,34 @@ const killSheep = (row) => {
 watch(
   () => [...state.killList],
   (newVal) => {
-    console.log(newVal);
+    const sameSheep = newVal.filter(
+      (o) => o.animalName === state.curChoiceSheep.animalName
+    );
+    sameSheep.length === 3
+      ? (state.killList = state.killList.filter(
+          (o) => o.animalName != state.curChoiceSheep.animalName
+        ))
+      : '';
+    if (state.killList.length === 7) {
+      ElMessageBox.alert('游戏结束，为通关，是否重新开始？', '提醒', {
+        // if you want to disable its autofocus
+        // autofocus: false,
+        confirmButtonText: 'OK',
+        callback: (action) => {
+          ElMessage({
+            type: 'info',
+            message: `1`,
+          });
+        },
+      });
+    }
   }
 );
 onMounted(() => {
   state.sheepFlock = generateSheep();
   console.log(state.sheepFlock);
 });
-const { sheepFlock, killList } = toRefs(state);
+const { sheepFlock, killList, gameOverStatus } = toRefs(state);
 </script>
 
 <style lang="scss" scoped>
