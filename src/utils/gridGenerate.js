@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 import { checkIsKill, isOverlap } from './filterSheep.js';
-
+import store from '@/store/index';
+console.log(store.getters.getLevel);
 const gameAreaRange = {
   xBegin: 200,
   yBegin: 100,
@@ -8,7 +9,23 @@ const gameAreaRange = {
   yEnd: 700,
 }; // 游戏区域起始位置  并逐渐递减
 
-let levelNum = 10; // 小羊层次 相当于z轴
+// 采用数组对象 记录三组侧边栏的起始位置
+const gameAreaSiderRange = [
+  {
+    x: 1300,
+    y: 200,
+  },
+  {
+    x: 1300,
+    y: 350,
+  },
+  {
+    x: 1300,
+    y: 500,
+  },
+];
+
+let levelNum = store.getters.getLevel; // 小羊层次 相当于z轴
 
 const SheepPieceLen = 100; // 🐏 方块 边长
 
@@ -46,17 +63,19 @@ export function generateGamePiece(gameArea) {
 // 网格三维 [6][8][2]
 
 // 创建每层次棋盘区域以及产生的小羊总数量
-function generateGameAreaAndRandSheepNum() {
+function generateGameAreaAndRandSheepNum(inlevelNum) {
   let gameAreaAndRandSheepNumList = [];
   let sheepTotal = 0; // 小羊总数（所有层次相加）
-  for (let level = levelNum; level >= 1; level--) {
+  for (let level = inlevelNum; level >= 1; level--) {
     let t = {};
     t.gameArea = {
-      xBegin: gameAreaRange.xBegin + (levelNum - level) * levelNum,
+      xBegin: gameAreaRange.xBegin + (inlevelNum - level) * inlevelNum,
       yBegin:
-        gameAreaRange.yBegin + Math.ceil(((levelNum - level) * levelNum) / 2),
-      xEnd: gameAreaRange.xEnd - (levelNum - level) * levelNum,
-      yEnd: gameAreaRange.yEnd - Math.ceil(((levelNum - level) * levelNum) / 2),
+        gameAreaRange.yBegin +
+        Math.ceil(((inlevelNum - level) * inlevelNum) / 2),
+      xEnd: gameAreaRange.xEnd - (inlevelNum - level) * inlevelNum,
+      yEnd:
+        gameAreaRange.yEnd - Math.ceil(((inlevelNum - level) * inlevelNum) / 2),
     };
     t.gameDisc = generateGamePiece(t.gameArea);
     t.randomSheepNum = randomRangeByTimes(
@@ -70,31 +89,16 @@ function generateGameAreaAndRandSheepNum() {
   return { gameAreaAndRandSheepNumList, sheepTotal };
 }
 
-export function generateSheep() {
+export function generateSheep(inlevelNum) {
   let sheepFlock = [];
   let { gameAreaAndRandSheepNumList, sheepTotal } =
-    generateGameAreaAndRandSheepNum(); // 获取所有层次网格及每层次随机网格数量。。。
-  let animalList = getAnimalList(sheepTotal); // 获取动物列表
-  console.log(animalList, 'animalList');
-  for (let level = levelNum; level >= 1; level--) {
-    /* const gameArea = {
-      xBegin: gameAreaRange.xBegin + (levelNum - level) * levelNum,
-      yBegin:
-        gameAreaRange.yBegin + Math.ceil(((levelNum - level) * levelNum) / 2),
-      xEnd: gameAreaRange.xEnd - (levelNum - level) * levelNum,
-      yEnd: gameAreaRange.yEnd - Math.ceil(((levelNum - level) * levelNum) / 2),
-    };
-    let gameDisc = generateGamePiece(gameArea);
-    const randomSheepNum = randomRangeByTimes(
-      Math.ceil((gameDisc.xNum * gameDisc.yNum) / 2),
-      gameDisc.xNum * gameDisc.yNum,
-      3
-    ); */
+    generateGameAreaAndRandSheepNum(inlevelNum); // 获取所有层次网格及每层次随机网格数量。。。
+  let animalList = getAnimalList(sheepTotal, useAnimalNum); // 获取动物列表
+  for (let level = inlevelNum; level >= 1; level--) {
     const gameArea = gameAreaAndRandSheepNumList[level].gameArea;
     let gameDisc = gameAreaAndRandSheepNumList[level].gameDisc;
     const randomSheepNum = gameAreaAndRandSheepNumList[level].randomSheepNum;
-    /* console.log(gameDisc, 'gameDisc');
-    console.log(randomSheepNum, 'randomSheepNum'); */
+
     for (
       let curLevelSheepIndex = 0;
       curLevelSheepIndex < randomSheepNum;
@@ -111,6 +115,7 @@ export function generateSheep() {
         // 坑位还在
         const animal = getAnimalNo(
           animalList,
+          useAnimalNum, // 10
           sheepTotal,
           randomSheepNum,
           level
@@ -132,18 +137,59 @@ export function generateSheep() {
       }
     }
     sheepTotal -= randomSheepNum;
-    console.log(sheepTotal);
   }
-  /* console.log(animalList, 'animalList');
-  console.log(
-    generateGameAreaAndRandSheepNum(),
-    'generateGameAreaAndRandSheepNum'
-  ); */
+  // 层次大于6，相当于困难级别以上，才开启侧边栏
+  if (inlevelNum > 6) {
+    /**
+     * 处理侧边栏卡片
+     */
+    // 总的侧边栏卡片数量
+    const siderNumTotal = randomRangeByTimes(30, 50, 3);
+    // 这里给8种动物卡片
+    let siderAnimalList = getAnimalList(siderNumTotal, 8);
+    console.log(siderNumTotal);
+    // 三组侧边栏卡片
+    let total = siderNumTotal;
+    for (let i = 0; i < 3; i++) {
+      // 每组随机分层 5-10
+      let curSiderLevelNum = 0;
+      if (i != 2) {
+        curSiderLevelNum = randomRange(8, 14);
+        total -= curSiderLevelNum;
+      } else {
+        curSiderLevelNum = total;
+      }
+      console.log(curSiderLevelNum);
+      for (let j = curSiderLevelNum; j >= 1; j--) {
+        // 坑位还在
+        const animal = getAnimalNo(
+          siderAnimalList,
+          8,
+          siderNumTotal,
+          1, // 调用的函数 后两个入参暂时不处理，先随便写下
+          curSiderLevelNum
+        ); // 取得随机动物编号 - 图片名称
+        siderAnimalList = animal.obj;
+        const param = {
+          id: nanoid(),
+          style: {
+            zIndex: curSiderLevelNum,
+            //起始 200 ，结尾800
+            left: gameAreaSiderRange[i].x - j * 10 + 'px',
+            top: gameAreaSiderRange[i].y + 'px',
+            cursor: 'pointer',
+          },
+          animalName: animal.name,
+        };
+        sheepFlock.push(param);
+      }
+    }
+  }
   return colourSheep(sheepFlock);
 }
 
 // 编写产生startNumber至endNumber随机数的函数
-function randomRange(startNumber, endNumber) {
+export function randomRange(startNumber, endNumber) {
   var choice = endNumber - startNumber + 1;
   return Math.floor(Math.random() * choice + startNumber);
 }
@@ -174,7 +220,7 @@ export function colourSheep(sheepFlock) {
  * @param {产生的动物总数量} curTotalNum
  * @returns
  */
-export function getAnimalList(curTotalNum) {
+export function getAnimalList(curTotalNum, useAnimalNums) {
   const animalList = [
     'Artboard1',
     'Artboard2',
@@ -216,10 +262,10 @@ export function getAnimalList(curTotalNum) {
     'Artboard38',
   ];
   let curAnimalList = animalList.filter((o) => {
-    return Number(o.slice(8)) <= useAnimalNum;
+    return Number(o.slice(8)) <= useAnimalNums;
   });
-  const animalListNum = Math.floor(curTotalNum / (3 * useAnimalNum)); // 动物列表的动物要进行'几趟'，向下取整
-  const finalanimalListNum = (curTotalNum % (3 * useAnimalNum)) / 3; // 最后一趟参与的动物数量
+  const animalListNum = Math.floor(curTotalNum / (3 * useAnimalNums)); // 动物列表的动物要进行'几趟'，向下取整
+  const finalanimalListNum = (curTotalNum % (3 * useAnimalNums)) / 3; // 最后一趟参与的动物数量
   let finalAnimalList = curAnimalList.map((o) => {
     let t = {};
     if (Number(o.slice(8)) <= finalanimalListNum) {
@@ -235,14 +281,21 @@ export function getAnimalList(curTotalNum) {
 /**
  *
  * @param {动物列表占用情况} animalList
+ * @param {使用的动物卡片数量} useAnimalNums
  * @param {当前还有多少动物未占用席位} curTotal
  * @param {当前层级动物数量} curLevelSheepNum
  * @param {当前层级} level
  * @returns
  */
 // 暂不考虑赢的分配动物分配算法，全靠概率赢
-function getAnimalNo(animalList, curTotal, curLevelSheepNum, level) {
-  const animalNo = randomRange(0, useAnimalNum - 1); //采用10头sheep，也就是30一轮回
+function getAnimalNo(
+  animalList,
+  useAnimalNums,
+  curTotal,
+  curLevelSheepNum,
+  level
+) {
+  const animalNo = randomRange(0, useAnimalNums - 1); //采用10头sheep，也就是30一轮回
   let flag = true;
   if (animalList[animalNo]['Artboard' + (animalNo + 1)] > 0) {
     animalList[animalNo]['Artboard' + (animalNo + 1)] -= 1;
@@ -250,7 +303,13 @@ function getAnimalNo(animalList, curTotal, curLevelSheepNum, level) {
     flag = false;
   }
   if (!flag && !checkAnimalNumOut(animalList)) {
-    return getAnimalNo(animalList, curTotal, curLevelSheepNum, level);
+    return getAnimalNo(
+      animalList,
+      useAnimalNums,
+      curTotal,
+      curLevelSheepNum,
+      level
+    );
   } else
     return {
       name: 'Artboard' + (animalNo + 1),
